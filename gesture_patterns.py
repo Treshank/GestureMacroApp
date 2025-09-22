@@ -14,6 +14,18 @@ def is_peace(lm):
         lm[20].y > lm[17].y    # pinky tip below pinky base
     )
 
+def is_rock(lm):
+    # Rock sign: thumb and pinky up, index, middle, ring down
+    return (
+        lm[4].y < lm[0].y and  # thumb tip above wrist
+        lm[8].y < lm[5].y and  # index tip below index base
+        lm[12].y > lm[9].y and # middle tip below middle base
+        lm[16].y > lm[13].y and # ring tip below ring base
+        lm[20].y < lm[17].y    # pinky tip above pinky base
+    )
+
+
+
 def is_finger_open(lm, tip, base):
     # Check if a finger is open based on its tip and base landmarks
     v_finger = np.array([lm[tip].x - lm[0].x, lm[tip].y - lm[0].y])

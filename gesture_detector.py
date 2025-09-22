@@ -1,7 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-from gesture_patterns import is_peace, is_open_palm, is_fist, is_open_index
+from gesture_patterns import is_peace, is_open_palm, is_fist, is_open_index, is_rock
 
 class GestureDetector:
     def __init__(self):
@@ -11,6 +11,7 @@ class GestureDetector:
                                          min_detection_confidence=0.8,
                                          min_tracking_confidence=0.8)
         self.mp_draw = mp.solutions.drawing_utils
+        self.paused = False
 
     def detect(self, frame):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -22,8 +23,13 @@ class GestureDetector:
         palm_tips_x = []
         # Track all finger tip positions for open palm swipe
         if results.multi_hand_landmarks:
+            gesture = ""
             for hand_landmarks in results.multi_hand_landmarks:
                 lm = hand_landmarks.landmark
+                # Pause/resume detection on rock gesture
+                if is_rock(lm):
+                    self.paused = not self.paused
+                    return 'Paused' if self.paused else 'Resumed'
                 # Use pattern matching for gestures
                 if is_peace(lm):
                     gesture = "Peace"

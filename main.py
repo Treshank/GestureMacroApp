@@ -10,8 +10,7 @@ def main():
     gesture_detector = GestureDetector()
     macro_executor = MacroExecutor()
     last_gesture = None
-    frame_delay = 0.05  # 50ms delay ~ 20 FPS
-
+    pause_delay = 0.5   # 500ms delay when paused or no hand
     print("Starting gesture macro app. Press 'q' to quit.")
     while True:
         ret, frame = video_capturer.get_frame()
@@ -24,8 +23,14 @@ def main():
 
         # Detect gesture using MediaPipe
         gesture = gesture_detector.detect(frame)
+        if gesture == 'Paused':
+            print("Gesture detection paused. Show 'rock' again to resume.")
+        elif gesture == 'Resumed':
+            print("Gesture detection resumed.")
+
         if gesture != last_gesture and gesture is not None:
-            macro_executor.execute(gesture)
+            if gesture_detector.paused:
+                macro_executor.execute(gesture)
             last_gesture = gesture
         elif gesture is None:
             last_gesture = None
@@ -34,7 +39,8 @@ def main():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        # time.sleep(frame_delay)
+        if gesture_detector.paused or gesture is None:
+            time.sleep(pause_delay)
 
     video_capturer.release()
     cv2.destroyAllWindows()
